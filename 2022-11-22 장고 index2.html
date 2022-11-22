@@ -1,0 +1,104 @@
+<html>
+   <head>
+      <title>File Test</title>
+
+      <style>
+        .total>div{
+          display: inline-block;
+          margin : 50px 100px;
+
+        }
+        table,td, th{
+          border:1px solid black;
+        }
+      </style>
+
+      <script>
+        function is_checked(name){
+          var checkedValue = name.value;
+          var checkedTrue = name.checked;
+          if (checkedTrue == false){
+            document.getElementById(checkedValue).value = "1";
+          }else{
+            document.getElementById(checkedValue).value = "0";
+          }
+        }
+      </script>
+
+   </head>
+   <body>
+    <form method = 'POST' enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <input type='file' name = 'fileInput' style="border: 1px solid black;">
+      <input type='submit' value='확인' formaction = "http://127.0.0.1:8000/polls/dataframe/">
+
+      {% if  file  %}
+      <div class = 'address'>현재 파일 : <input type = 'text' value = {{file}} disabled = 'disabled'></div>
+      <input type = 'hidden' name = 'hidden_name' value = {{file}}>
+
+      {% else  %}
+      <div class = 'address'>현재 파일 : <input type = 'text' disabled = 'disabled'></div>
+      {% endif %}
+
+      {% if result %}
+      <input type ='hidden' name = 'columns' value = "{{result}}">
+      {% endif %}
+
+      {% if data %}
+      <input type ='hidden' name = 'datas' value = "{{data}}">
+      {% endif %}
+
+    <div class = 'total'>
+    <div style = 'border:2px solid violet;'>
+      {% if result %}
+      <table>
+        <tr>
+        {% for i in result %}
+        <th>{{i}}</th>
+        {% endfor %}
+        </tr>
+        <tr>
+        {% for i in data %}
+        <tr>
+        {% for j in i%}
+          <td>{{j}}</td>
+        {% endfor %}
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %} 
+    </div><!-- id = 'sub1' -->
+
+    <div style = 'border:2px solid violet;'>
+      {% if updated_col_li %}
+      <table>
+        <tr>
+        {% for i in updated_col_li %}
+        <th>{{i}}</th>
+        {% endfor %}
+        </tr>
+        <tr>
+        {% for i in updated_total_data_li %}
+        <tr>
+        {% for j in i%}
+          <td>{{j}}</td>
+        {% endfor %}
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %} 
+    </div><!-- id = 'sub2' -->
+  </div><!-- class = 'total' -->
+  <div>
+    {% for i in result %}
+      - {{i}}<input type = 'checkbox' name = {{i}} value = {{i}} onchange="is_checked(this)">
+      <input type = 'hidden' name = {{i}} id = {{i}} value = "1">
+      <br>
+    {% endfor %}
+    <input type = 'submit' name = 'submit' value = '변경' formaction='http://127.0.0.1:8000/polls/modify/'>
+  </div>
+
+  </form>
+  </body>
+</html>
