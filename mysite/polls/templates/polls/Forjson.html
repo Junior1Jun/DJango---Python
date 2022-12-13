@@ -1,0 +1,350 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type ="text/css" href="{% static 'style.css'%}">
+    <style>
+         .red_bold{
+            color:red;
+            font-weight: bold;
+        }
+        #link{
+            text-decoration: none;
+            color: white;
+        }
+        .th{           
+            vertical-align: top;
+            text-align: right;
+        }
+
+    </style>
+
+    <script>
+        function set_num(){
+            var address = document.getElementsByName('hidden_service_key')[0].value;
+            var linked_num = document.getElementsByName('checked_page_num')[0].value;
+            var content;
+            if (address.indexOf("https://api.odcloud.kr/api/") == 0){
+                content = 1;
+            }else if (address.indexOf("https://www.law.go.kr/DRF/lawSearch.do") == 0 && address.indexOf("target=law")!=-1){
+                content = 2;
+            }else if (address.indexOf("https://www.law.go.kr/DRF/lawSearch.do") == 0 && address.indexOf("target=admrul")!=-1){
+                content = 3;
+            }
+            var linked = document.getElementById("link");
+            linked.href = "http://127.0.0.1:8000/api/questions/" + linked_num + "/" + content;
+        }
+
+
+        function startclock(){
+            setInterval("set_num()",10);
+        }
+
+
+    </script>
+</head>
+<body  onload = "startclock()">
+{% block header%}
+{% include "./header.html"%}
+{% endblock %}
+    <form method = 'POST'>
+        <br>
+        <div class="box">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td class = 'th' style = "width:235px">오픈 API 주소를 입력하십시오 : </td>
+                <td>
+                    &nbsp;&nbsp;<input class = 'text' type = 'text' name = 'service_key' value='{{service_key}}'><br><br>
+                    <input type = 'hidden' name = 'hidden_service_key' value = '{{service_key}}'>
+                </td> 
+            </tr>
+
+            <tr>
+                <td class = 'th'>원하는 페이지를 입력하십시오 : </td>
+                <td>
+                    &nbsp;&nbsp;<input  type = 'text' name = 'page_num' value = '{{page_num}}'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="btn1" type = 'submit' value = '데이터 수집 및 매핑' formaction = "http://127.0.0.1:8000/polls/json/">
+                    {% if enter_data %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span>{{enter_data}}</span>{% else %}
+                    {% endif %}<br><br>
+                </td>
+            </tr>
+        {% if error_message %}
+        <tr>
+            <td class = 'th'>Error : </td>
+            <td class = 'td'><span class = 'red_bold'>&nbsp;&nbsp;{{ error_message }}<br><br></span></td>
+        </tr>
+
+        <tr>
+            <td class = 'th'>code : </td>
+            <td class = 'td'><span class = 'red_bold'>&nbsp;&nbsp;{{error_code}}<br><br></span></td>
+        </tr>
+        
+        <tr>
+            <td class = 'th'>사유 : </td>
+            <td><span class = 'red_bold'>&nbsp;&nbsp;{{ cause }}</span><br><br></td>
+        </tr>
+        
+        <tr>
+            <td class = 'th'>요청하신 API 주소 : </td>
+            <td class = 'td'>&nbsp;&nbsp;{{service_key1}}<br><br></td>
+        </tr>
+        
+        <tr>
+            <td class = 'th'>요청하신 페이지 : </td>
+            <td>&nbsp;&nbsp;{{page_num}}<br><br></td>
+        </tr>
+
+        {% if unmapping_col %}
+        <tr>
+            <td class = 'th'>매핑 리스트 : </td>
+            <td>{{before_error}}<span class = 'red_bold'>{{unmapping_col}}</span>{{after_error}}</td>
+        </tr>
+        {% endif %}
+
+        {% endif %}
+        </table>
+        </div>
+
+        {% if page_num and not error_message %}
+        <br> 
+        &nbsp;
+        <input class='btn1' type = 'submit' value = 'DB로 저장' formaction = "http://127.0.0.1:8000/polls/json/db/">
+        <input type = 'hidden' value = '{{data_name}}' name = "data_name">
+        &nbsp;&nbsp;
+        <button class = 'btn1'><a id = "link">REST API로 이동</a></button>
+        
+        {% endif %}
+        
+        <br><br>
+
+        {% if page_num and not error_message %}
+        <div class="nowdata">현재 페이지 : {{page_num}} 쪽</div>
+        <input type = 'hidden' value = '{{page_num}}' name = 'checked_page_num'>
+        {% endif %}
+
+        {% if data_name and not error_message %}
+        <div class="nowdata">원본 데이터명 : {{data_name}}</div>
+        {% endif %}
+        <br>
+        <br>
+        {% if Values_zip %}
+        <div class = 'table_container'>
+        <div class = 'table_div1'> 
+        <h3>&nbsp;[매핑전 데이터]</h3> 
+        <table>
+            {% for j,i in Values_zip %}
+            <tr><td>{{j}}</td></tr>
+            {% for key, value in i.items %}
+            {% if key == first_key %}
+            <tr>
+                <td class = 'th'>
+                {      {{key}} :
+                </td>
+                <td class = 'td'>
+                    {{value}},
+                </td>
+            </tr>
+            {% elif key == last_key %}
+            <tr>
+                <td class = 'th'>
+                {{key}} :
+                </td>
+                <td class = 'td'>
+                    {{value}}      },
+                </td>
+            </tr>
+            <tr>
+                <td><div class = 'blank'></div></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td class = 'th'>
+                {{key}} :
+                </td>
+                <td class = 'td'>
+                    {{value}},
+                </td>
+            </tr>
+            {% endif %} 
+
+            {% endfor %}
+            {% endfor %}
+        </table>
+        </div><!-- class = 'table_div1' -->
+        {% endif %}
+
+
+
+        {% if concat_zip %}
+        <div class = 'table_div1'>
+            <h3>&nbsp;[매핑후 데이터]</h3>
+            <table>
+                {% for j,i in concat_zip %}
+                <tr><td>{{j}}</td></tr>
+                {% for key,value in i.items %}
+                {% if  data_name == '전문자료' %}
+                    {% if key == 'title' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>
+                            {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        }
+                        {% endfor %}
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% elif key == 'identifier' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                            { {% for k,v in value.items %}
+                            <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                            }
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>},<br><br><br></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        {% endfor %}
+                        }
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% endif %}<!-- if key == '제목' -->
+
+                {% elif  data_name == '현행법령' %}
+                    {% if key == 'type' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>
+                            {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        }
+                        {% endfor %}
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% elif key == 'relation' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                            { {% for k,v in value.items %}
+                            <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                            }
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>},<br><br><br></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        {% endfor %}
+                        }
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% endif %}<!-- if key == '제목' -->
+
+                    {% elif  data_name == '행정규칙' %}
+                    {% if key == 'type' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>
+                            {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        }
+                        {% endfor %}
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% elif key == 'relation' %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                            { {% for k,v in value.items %}
+                            <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                            }
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = 'th2'>},<br><br><br></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td class = 'th2'>
+                        {{key}} :
+                        </td>
+                        <td class = 'td'>
+                        { {% for k,v in value.items %}
+                        <div><span class = 'span'>{{k}}</span>:{{v}}</div>
+                        {% endfor %}
+                        }
+                        <br><br>
+                        </td>
+                    </tr>
+                    {% endif %}<!-- if key == '제목' -->
+
+                {% else %}
+                {% endif %}
+
+                {% endfor %}<!-- for key,value in i.items -->
+                {% endfor %}<!-- for j,i in concat_zip -->
+
+            </table>
+        </div><!-- class = 'table_div1' -->
+        {% endif %}
+    </div>
+    </form>
+</body>
+</html>

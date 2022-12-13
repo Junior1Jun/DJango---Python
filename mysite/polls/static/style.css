@@ -1,0 +1,73 @@
+
+.logo{width:50px; height:50px;}
+.navbar_logo{background-color:#000000;}
+.navname{color:white; font-size:20px;position: relative; left: 10px; top:-17px;  text-decoration: none;}
+
+
+    
+       body{
+        width:3000px;
+        }
+
+        .box{
+            background-color: #f5f5f5;
+            padding: 15px;
+        }
+
+        .btn1{
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        }
+        
+
+        .th{           
+            width: 195px;
+            vertical-align: top;
+            text-align: right;
+        }
+        .th2{
+            
+            width: 100px;
+            vertical-align: top;
+            text-align: right;
+        }
+        .td{
+            width: 600px;
+            overflow: hidden;
+        }
+        .blank{
+            height: 50px;
+        }
+        .nowdata{
+            padding: 8px;
+            background-color: #f7f7f9;
+            border: 1px solid #e1e1e8;
+            width:2000px;
+            display:flex;
+            border-radius: 4px;
+           
+            
+        }
+
+        .table_div1{
+            width:850px;
+            border: 1px solid #e1e1e8;
+            background-color:  #f5f5f5;
+            border-radius: 8px;
+        }
+        .table_container{
+            display:flex;
+            
+        }
+        .span{
+            color:red;
+            font-weight: bold;
+        }
+        .text{
+            width: 500px;
+        
+        }
+        
+
+    
